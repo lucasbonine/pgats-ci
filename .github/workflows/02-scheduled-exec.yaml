@@ -5,7 +5,8 @@ on:
   schedule:
     # cronograma de execução
     # 1 - minuto, 2 - hora, 3 - dia do mês, 4 - mês, 5 - dia da semana
-    - cron: '*/6 * * * *' # toda meia noite no domingo
+    # Evita o início da hora, quando execuções agendadas podem atrasar ou ser descartadas.
+    - cron: '3,9,15,21,27,33,39,45,51,57 * * * *' # a cada 6 minutos
 
 jobs:
   e2e-tests:
