@@ -1,0 +1,51 @@
+#CI de nível 3 - disparo após a conclusão de outra pipeline
+name: 'Execução por deploy'
+
+on:
+  workflow_run:
+    workflows: ['Execução Manual'] # referência da pipeline 01 manual
+    types:
+      - completed
+
+jobs:
+  e2e-tests:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      checks: write
+      actions: read
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.x
+
+      - name: Instalando yarn
+        run: npm install -g yarn
+
+      - name: Instalando dependências
+        run: yarn
+
+      - name: Instalando Browsers do playwright
+        run: yarn playwright install --with-deps
+
+      - name: Executando testes e2e
+        run: yarn run e2e
+
+      - name: Publicando relatório dos testes
+        if: always()
+        uses: dorny/test-reporter@v2
+        with:
+          name: Relatório Playwright
+          path: results.xml
+          reporter: java-junit
+
+      - name: Salvando relatório HTML do Playwright
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
