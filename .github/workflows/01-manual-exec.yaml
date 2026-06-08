@@ -5,7 +5,7 @@ on:
 
 jobs:
   e2e-tests:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     permissions:
       contents: read
