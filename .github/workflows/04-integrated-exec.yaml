@@ -1,12 +1,18 @@
-#CI de nível 1 - execução manual
-name: 'Execução Manual'
+#CI de nível 4 - pipeline integrada ao build do código
+name: 'Execução integrada'
 
 on:
-  workflow_dispatch: # execução manual
+  workflow_dispatch:
 
 jobs:
   e2e-tests:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success'}} # só dispara a pipeline quando a referenciada der sucesso
+
+    permissions:
+      contents: read
+      checks: write
+      actions: read
 
     steps:
       - uses: actions/checkout@v6
