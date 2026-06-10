@@ -46,7 +46,7 @@ jobs:
       - name: Rodando testes unitários
         run: yarn run test # execução dos testes unitários do diretório test
 
-  e2e-tests: # teste end to end com playwright
+  e2e-tests: # teste end to end com playwright, e2e é um script que chama o comando 'npx playwright test'
     runs-on: ubuntu-latest
     needs: [inspecao-lint]
 
