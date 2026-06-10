@@ -1,49 +1,85 @@
 #CI de nível 4 - pipeline integrada ao build do código
+# possui vários steps que possuem dependência
+# encadeia análise estática do código, análise E2E e por fim um deploy
 name: 'Execução integrada'
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: # o disparo ainda é manual
 
 jobs:
-  e2e-tests:
+  inspecao-lint: # análise estática do código
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success'}} # só dispara a pipeline quando a referenciada der sucesso
-
-    permissions:
-      contents: read
-      checks: write
-      actions: read
 
     steps:
       - uses: actions/checkout@v6
 
       - uses: actions/setup-node@v6
         with:
-          node-version: 24.x
+          node-version: latest
 
       - name: Instalando yarn
         run: npm install -g yarn
 
       - name: Instalando dependências
+        run: yarn # instala tudo, inclusive o lint
+
+      - name: Inspeção de código
+        run: yarn lint # análise estática. existe a dependência no package.json
+
+  testes-unitarios: # testes unitários do diretório test
+    runs-on: ubuntu-latest
+    needs: [inspecao-lint] # define pré-requisito
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: latest
+
+      - name: Instalando Yarn
+        run: npm install -g yarn
+
+      - name: Instalando dependências
         run: yarn
 
-      - name: Instalando Browsers do playwright
-        run: yarn playwright install --with-deps
+      - name: Rodando testes unitários
+        run: yarn run test # execução dos testes unitários do diretório test
 
-      - name: Executando testes e2e
-        run: yarn run e2e
+e2e-tests: # teste end to end com playwright
+  runs-on: ubuntu-latest
+  needs: [inspecao-lint]
 
-      - name: Publicando relatório dos testes
-        if: always()
-        uses: dorny/test-reporter@v2
-        with:
-          name: Relatório Playwright
-          path: results.xml
-          reporter: java-junit
+  steps:
+    - uses: actions/checkout@v4
 
-      - name: Salvando relatório HTML do Playwright
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report
-          path: playwright-report/
+    - uses: actions/setup-node@v4
+      with:
+        node-version: latest
+
+    - name: Instalando Yarn
+      run: npm install -g yarn
+
+    - name: Instalando dependências
+      run: yarn
+
+    - name: Instalando Browsers do Playwright
+      run: yarn playwright install
+
+    - name: Executando testes E2E
+      run: yarn run e2e
+
+    - name: Salvando relatórios de testes
+      uses: actions/upload-artifact@v4
+      if: ${{ always() }}
+      with:
+        path: ./playwright-report
+        name: Relatório de Testes E2E
+  
+deploy: # simula um step de deploy
+  runs-on: ubuntu-latest
+  needs: [unidade, e2e-tests]
+
+  steps:
+    - name: Simulação de Deploy
+      run: echo 'Deploy sendo realizado...'
