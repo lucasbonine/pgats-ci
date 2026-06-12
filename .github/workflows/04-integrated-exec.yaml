@@ -1,6 +1,7 @@
 #CI de nível 4 - pipeline integrada ao build do código
 # possui vários steps que possuem dependência
 # encadeia análise estática do código, análise E2E e por fim um deploy
+# amarração de vários steps
 name: 'Execução integrada'
 
 on:
