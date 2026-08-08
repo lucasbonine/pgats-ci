@@ -6,16 +6,11 @@ on:
     # cronograma de execução
     # 1 - minuto, 2 - hora, 3 - dia do mês, 4 - mês, 5 - dia da semana
     # Evita o início da hora, quando execuções agendadas podem atrasar ou ser descartadas.
-    - cron: '0 0 * * 0' # domingo
+    # - cron: '0 0 * * 0' # domingo #comentado para não disparar toda a semana
 
 jobs:
   e2e-tests:
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-      checks: write
-      actions: read
 
     steps:
       - uses: actions/checkout@v6
